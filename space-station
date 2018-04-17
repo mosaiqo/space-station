@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+if (file_exists(__DIR__.'/../../autoload.php')) {
+    require __DIR__.'/../../autoload.php';
+} else {
+    require __DIR__.'/vendor/autoload.php';
+}
+
+$app = new Symfony\Component\Console\Application('Mosaiqo SpaceStation', '0.1.0');
+$app->add(new Mosaiqo\SpaceStation\Console\ConfigCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\InitCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\StartCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\StopCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\RemoveCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\GenerateSslCertificateCommand);
+$app->run();
