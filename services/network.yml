@@ -1,0 +1,5 @@
+
+networks:
+ dev-env-network:
+  external:
+   name: "${NETWORK_NAME}"

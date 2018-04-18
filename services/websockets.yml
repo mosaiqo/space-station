@@ -1,0 +1,10 @@
+  websockets:
+    image: k1sliy/laravel-echo-server
+    container_name: "${CONTAINER_PREFIX}-websockets"
+    ports:
+     - "6001:6001"
+    restart: always
+    volumes:
+     - ./echo/config.json:/app/laravel-echo-server.json
+    networks:
+     - "${NETWORK_NAME}"

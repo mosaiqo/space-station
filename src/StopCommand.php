@@ -35,18 +35,14 @@ class StopCommand extends BaseCommand {
 
 	protected function stopEnvironment($output)
 	{
-		$directory = getcwd();
 		$commands = [
 			'docker-compose -f ./docker/docker-compose.yml down'
 		];
 
-		$process = new Process(implode(' && ', $commands), $directory, null, null, null);
-		if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
-			$process->setTty(true);
-		}
-		$process->run(function ($type, $line) use ($output) {
-			$this->text($line);
-		});
+		array_map(function ($cmd) {
+			$directory = $this->getEnvDirectory();
+			$this->runCommand($cmd, $directory);
+		}, $commands);
 	}
 
 }

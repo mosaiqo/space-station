@@ -44,7 +44,6 @@ class RemoveCommand extends BaseCommand {
 	 */
 	protected function removeEnvironment()
 	{
-		$directory = getcwd();
 		$prefix = getenv('CONTAINER_PREFIX');
 
 		$commands = [
@@ -57,7 +56,10 @@ class RemoveCommand extends BaseCommand {
 			"docker network ls --filter=name=$prefix",
 		];
 
-		array_map(function ($cmd) { $this->runCommand($cmd); }, $commands);
+		array_map(function ($cmd) {
+			$directory = $this->getEnvDirectory();
+			$this->runCommand($cmd, $directory);
+		}, $commands);
 	}
 
 }

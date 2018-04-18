@@ -1,0 +1,15 @@
+  proxy:
+    image: jwilder/nginx-proxy
+    container_name: "${CONTAINER_PREFIX}-proxy"
+    ports:
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./nginx/conf.d/custom.conf:/etc/nginx/conf.d/custom.conf:ro
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ./logs/proxy:/var/log/nginx
+    networks:
+      - "${NETWORK_NAME}"
+    restart: always

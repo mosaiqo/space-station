@@ -43,15 +43,18 @@ class StartCommand extends BaseCommand {
 	 */
 	protected function startEnvironment()
 	{
-		$directory = getcwd();
+
 		$prefix = getenv('CONTAINER_PREFIX');
 
 		$commands = [
-			'docker-compose -f ./docker/docker-compose.yml up --build -d',
+			"docker-compose -f ./docker/docker-compose.yml up --build -d",
 			"docker network ls --filter=name=$prefix",
 			"docker ps --filter=name=$prefix"
 		];
 
-		array_map(function ($cmd) { $this->runCommand($cmd); }, $commands);
+		array_map(function ($cmd) {
+			$directory = $this->getEnvDirectory();
+			$this->runCommand($cmd, $directory);
+			}, $commands);
 	}
 }

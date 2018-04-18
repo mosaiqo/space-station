@@ -56,9 +56,7 @@ class InitCommand extends BaseCommand
 	 */
 	protected function isItConfigured()
 	{
-		$fileSystem = new Filesystem();
-		$file = getcwd() . '/.env';
-		return !$fileSystem->exists($file);
+		return !$this->fileSystem->exists($this->getEnvFile());
 	}
 
 	/**
@@ -72,8 +70,6 @@ class InitCommand extends BaseCommand
 		} catch (\Exception $e) {
 			$this->logger->log('error', [$e]);
 		}
-
-//		$this->output->writeln($returnCode);
 	}
 
 	/**

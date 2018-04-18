@@ -1,0 +1,10 @@
+  redis:
+    image: redis:alpine
+    container_name: "${CONTAINER_PREFIX}-redis"
+    volumes:
+      - redisdata:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - "${NETWORK_NAME}"
+    restart: always

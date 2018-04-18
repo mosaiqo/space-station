@@ -17,8 +17,15 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
-class ConfigCommand extends Command
+/**
+ * Class ConfigCommand
+ * @package Mosaiqo\SpaceStation\Console
+ */
+class ConfigCommand extends BaseCommand
 {
+	/**
+	 * @var array
+	 */
 	private $defaults = [
 		'HTTP_PORT' => [
 			'text' => 'Please enter the HTTP port: (80) ',
@@ -74,12 +81,18 @@ class ConfigCommand extends Command
 		],
 	];
 
+	/**
+	 * @var array
+	 */
 	private $configs = [
 		'env' => [],
 		'services' => []
 	];
 
 
+	/**
+	 * @var array
+	 */
 	private $services = ['proxy', 'dns', 'mysql', 'websockets', 'redis', 'mongo'];
 	/**
 	 * Configure the command options.
@@ -90,14 +103,81 @@ class ConfigCommand extends Command
 	{
 		$this
 			->setName('config')
-			->setDescription('Configures "Space Station"!');
+			->setDescription('Configures "Space Station"!')
+			->addOption('default', 'd', InputOption::VALUE_NONE, 'Use default values for config')
+			->addOption('force', 'f', InputOption::VALUE_NONE, 'Overrides the files');
 	}
 
+	/**
+	 * @param InputInterface $input
+	 * @param OutputInterface $output
+	 * @return int|null
+	 */
 	public function execute(InputInterface $input, OutputInterface $output)
+	{
+		if ($this->envFileExists()) {
+			$helper = $this->getHelper('question');
+			if ($input->getOption('force')) {
+				$override = true;
+			} else {
+				$override = $helper->ask($input, $output, new ConfirmationQuestion(
+					'There is already a config file, do you want to override it? [yes/no] (no) ',
+					false,
+					'/^(y|j)/i'
+				));
+			}
+
+			if ($override) {
+				$this->removeEnvFile();;
+			} else {
+				return 0;
+			}
+
+		}
+
+		if ($input->getOption('default')) {
+			$this->createConfigFileByDefault();
+		} else {
+			$this->createConfigFileOnUserInput($input, $output);
+		}
+
+		$this->createEnvFile();
+		$this->createDockerFile();
+	}
+
+	/**
+	 *
+	 */
+	protected function createEnvFile () {
+		$envFile = $this->getEnvFile();
+
+		$this->fileSystem->mkdir($this->getEnvDirectory());
+		$this->fileSystem->touch($envFile);
+
+		foreach ($this->configs['env'] as $KEY => $value) {
+			$this->fileSystem->appendToFile($envFile, "$KEY=$value\n");
+		}
+
+		$this->info("Saved .env file");
+	}
+
+	/**
+	 *
+	 */
+	protected function removeEnvFile () {
+		if ($this->envFileExists()) {
+			$this->fileSystem->remove($this->getEnvFile());
+		}
+	}
+
+	/**
+	 * @param $output
+	 */
+	protected function createConfigFileOnUserInput($input, $output)
 	{
 		$helper = $this->getHelper('question');
 		$serviceQuestion = new ChoiceQuestion(
-			'Please select the services you would like to install (proxy, dns, mysql, websockets, redis, mongo)',
+			'Please select the services you would like to install ('. implode(', ', $this->services).')',
 			$this->services,
 			'0,1,2,3,4,5'
 		);
@@ -106,44 +186,94 @@ class ConfigCommand extends Command
 		$this->configs['services'] = $helper->ask($input, $output, $serviceQuestion);
 
 		foreach ($this->defaults as $key => $value) {
-			$this->configs['env'][$key] = $helper->ask($input, $output, new Question($value['text'], $value['default']));
+			$inputVal = $helper->ask($input, $output, new Question($value['text'], $value['default']));
+			if (strstr($inputVal, " ")) { $inputVal = "'$inputVal'";}
+			$this->configs['env'][$key] = $inputVal;
 		}
 
-		$output->writeln("<fg=blue>This are your selected services:</> \n");
-		$output->writeln("<fg=green>" . implode(', ', $this->configs['services']) . "</> \n");
+		$this->header("This are your selected services: \n");
+		$this->info(implode(', ', $this->configs['services']) . " \n");
 
-		$output->writeln("<fg=blue>This is the config:</>");
+		$this->header("This is the config:");
 		foreach ($this->configs['env'] as $KEY => $config) {
+			$this->info("$KEY=$config");
+		}
+		$this->text("\n");
+
+		$confirmationQuestion = new ConfirmationQuestion(
+			'Does this look ok? [yes|no] (yes)',
+			true,
+			'/^(y|j)/i'
+		);
+		$this->header("Saving .env file ...");
+		if (!$helper->ask($input, $output, $confirmationQuestion)) {
+			$this->header("Your config is not applied please run the command again");
+			return;
+		}
+	}
+
+	/**
+	 *
+	 */
+	protected function createConfigFileByDefault()
+	{
+		$this->header("Generating default .env file");
+		foreach ($this->defaults as $key => $value) {
+			$config = $value['default'];
 			if (strstr($config, " ")) {
 				$config = "'$config'";
 			}
-			$output->writeln("<fg=green>$KEY=$config</>");
+			$this->configs['env'][$key] = $config;
 		}
-		$output->writeln("\n");
-
-		$confirmationQuestion = new ConfirmationQuestion(
-			'Does this look ok? [y/yes] (yes)',
-			'yes',
-			'/^(y|j)/i'
-		);
-
-		if (!$helper->ask($input, $output, $confirmationQuestion)) {
-			$output->writeln("<fg=blue>Your config is not applied please run the command again</>");
-			return;
-		}
-
-		$this->creteEnvFile($output);
+		$this->configs['services'] = $this->services;
 	}
 
-	protected function creteEnvFile ($output) {
-		$output->writeln("<fg=blue>Saving .env file ...</>");
-		$fileSystem = new Filesystem();
-		$fileSystem->touch('.env');
-		foreach ($this->configs['env'] as $KEY => $value) {
-			$fileSystem->appendToFile('.env', "$KEY=$value\n");
+	/**
+	 *
+	 */
+	protected function createDockerFile()
+	{
+		$directory = getcwd();
+		$envDirectory = $this->getEnvDirectory();
+		$helper = $this->getHelper('question');
+		if ($this->input->getOption('force')) {
+			$override = true;
+		} else {
+			$override = $helper->ask($this->input, $this->output, new ConfirmationQuestion(
+				'The file docker-compose.yml already exists, do you want to override it? [yes/no] (no) ',
+				false,
+				'/^(y|j)/i'
+			));
 		}
-		$output->writeln("<fg=green>Saved .env file</>");
+		if (!$override) { return; }
+
+		$this->fileSystem->mirror("$directory/docker", "$envDirectory/docker");
+		$this->fileSystem->mirror("$directory/logs", "$envDirectory/logs");
+
+		$this->header("Generating docker-compose.yml file");
+		$this->fileSystem->remove("$directory/docker/docker-compose.yml");
+		$this->fileSystem->copy("$directory/services/base.yml", "$envDirectory/docker/docker-compose.yml");
+
+		$this->configs['services'][] = 'network';
+
+		foreach ($this->configs['services'] as $service) {
+			$content = file_get_contents("$directory/services/$service.yml");
+			$this->fileSystem->appendToFile(
+				"$envDirectory/docker/docker-compose.yml",
+				"\n$content"
+			);
+		}
+		$volumeServices = array_intersect($this->configs['services'], ['mysql', 'redis', 'mongo']);
+		if ($volumeServices) {
+			$this->fileSystem->appendToFile("$envDirectory/docker/docker-compose.yml", "\nvolumes:");
+			foreach ($volumeServices as $service) {
+				$this->fileSystem->appendToFile(
+					"$envDirectory/docker/docker-compose.yml",
+					"\n {$service}data:\n  driver: \"local\""
+				);
+			}
+		}
+
+		$this->header("Finished generating file docker-compose.yml!");
 	}
-
-
 }

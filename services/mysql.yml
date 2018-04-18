@@ -1,0 +1,14 @@
+  mysql:
+    image: mysql:5.7
+    container_name: "${CONTAINER_PREFIX}-mysql"
+    expose:
+      - "${DB_PORT}"
+    ports:
+      - "${DB_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - "${NETWORK_NAME}"
+    restart: always
