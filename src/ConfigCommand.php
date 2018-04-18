@@ -233,7 +233,7 @@ class ConfigCommand extends BaseCommand
 	 */
 	protected function createDockerFile()
 	{
-		$directory = getcwd();
+		$directory = __DIR__ . DIRECTORY_SEPARATOR . "/..";
 		$envDirectory = $this->getEnvDirectory();
 		$helper = $this->getHelper('question');
 		if ($this->input->getOption('force')) {
