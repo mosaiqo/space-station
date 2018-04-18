@@ -53,7 +53,7 @@ class GenerateSslCertificateCommand extends BaseCommand {
 	 */
 	protected function createCertificate()
 	{
-		$directory = getcwd()."/docker";
+		$directory = $this->getEnvDirectory()."/docker";
 		$country = getenv('CERT_COUNTRY');
 		$state = getenv('CERT_STATE');
 		$city = getenv('CERT_CITY');
