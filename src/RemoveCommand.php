@@ -1,6 +1,7 @@
 <?php
 namespace Mosaiqo\SpaceStation\Console;
 
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use ZipArchive;
 use RuntimeException;
 use GuzzleHttp\Client;
@@ -23,7 +24,8 @@ class RemoveCommand extends BaseCommand {
 	{
 		$this
 			->setName('remove')
-			->setDescription('Removes all the containers for "Space Station"!');
+			->setDescription('Removes all the containers for "Space Station"!')
+			->addOption('force', 'f', InputOption::VALUE_NONE, 'Forces removing');
 	}
 
 	/**
@@ -33,6 +35,20 @@ class RemoveCommand extends BaseCommand {
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		$helper = $this->getHelper('question');
+		if ($this->input->getOption('force')) {
+			$remove = true;
+		} else {
+			$remove = $helper->ask($this->input, $this->output, new ConfirmationQuestion(
+				'This is going to remove all your containers, volumes, networks and config for Mosaiqo Space Station. Are you sure?',
+				false,
+				'/^(y|j)/i'
+			));
+		}
+
+		if (!$remove) { return; }
+
+
 		$this->header("Removing Mosaiqo SpaceStation: ");
 		$this->loadEnv();
 		$this->removeEnvironment();
@@ -51,15 +67,15 @@ class RemoveCommand extends BaseCommand {
 			"docker network rm $(docker network ls --filter=name=$prefix)",
 			"docker image rm $(docker image ls --filter=name=$prefix)",
 			"docker volume rm $(docker volume ls -qf dangling=true)",
-			"docker system prune -f",
-			"docker ps --filter=name=$prefix",
-			"docker network ls --filter=name=$prefix",
+			"docker system prune -f"
 		];
 
 		array_map(function ($cmd) {
 			$directory = $this->getEnvDirectory();
 			$this->runCommand($cmd, $directory);
 		}, $commands);
+
+		$this->fileSystem->remove($this->getEnvDirectory());
 	}
 
 }
