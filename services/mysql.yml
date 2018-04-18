@@ -1,5 +1,10 @@
   mysql:
-    image: mysql:5.7
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+      args:
+        MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
+    image: space-station/mysql:5.7
     container_name: "${CONTAINER_PREFIX}-mysql"
     expose:
       - "${DB_PORT}"

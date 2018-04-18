@@ -1,15 +1,18 @@
   proxy:
-    image: jwilder/nginx-proxy
+    build:
+      context: ./proxy
+      dockerfile: Dockerfile
+    image: space-station/proxy
     container_name: "${CONTAINER_PREFIX}-proxy"
     ports:
       - "${HTTP_PORT}:80"
       - "${HTTPS_PORT}:443"
     volumes:
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./nginx/conf.d/custom.conf:/etc/nginx/conf.d/custom.conf:ro
-      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ./proxy/certs:/etc/nginx/certs:ro
+      - ./proxy/conf.d/custom.conf:/etc/nginx/conf.d/custom.conf:ro
+      - ./proxy/proxy.conf:/etc/nginx/proxy.conf:ro
       - ./logs/proxy:/var/log/nginx
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - "${NETWORK_NAME}"
     restart: always

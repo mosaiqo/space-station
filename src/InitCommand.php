@@ -27,7 +27,9 @@ class InitCommand extends BaseCommand
 	{
 		$this
 			->setName('init')
-			->setDescription('Initializes "Space Station"!');
+			->setDescription('Initializes "Space Station"!')
+			->addOption('default', 'd', InputOption::VALUE_NONE, 'Use default values for config')
+			->addOption('force', 'f', InputOption::VALUE_NONE, 'Overrides the files');
 	}
 
 	/**
@@ -38,7 +40,7 @@ class InitCommand extends BaseCommand
 	 */
 	public function execute(InputInterface $input, OutputInterface $output)
 	{
-		$this->info('Init Mosaiqo SpaceStation...');
+		$this->info('Initializing SpaceStation...');
 
 		// If its not configured we need to configure the environment
 		if ($this->isItConfigured()) {
@@ -66,7 +68,12 @@ class InitCommand extends BaseCommand
 	{
 		$command = $this->getApplication()->find('config');
 		try {
-			$returnCode = $command->run(new ArrayInput(['-q' => true]), $this->output);
+			$returnCode = $command->run(
+				new ArrayInput([
+					'-f' => $this->input->getOption('force'),
+					'-d' => $this->input->getOption('default'),
+					'-q' => true
+				]), $this->output);
 		} catch (\Exception $e) {
 			$this->logger->log('error', [$e]);
 		}
@@ -78,11 +85,11 @@ class InitCommand extends BaseCommand
 	 */
 	protected function runStartCommand()
 	{
-		$this->info("Start Mosaiqo SpaceStation...");
+		$this->info("Start SpaceStation...");
 		$command = $this->getApplication()->find('start');
 		$returnCode = $command->run(new ArrayInput([]), $this->output);
 		if ($returnCode === 0) {
-			$this->info("Mosaiqo SpaceStation is up and running!");
+			$this->info("SpaceStation is up and running!");
 		}
 	}
 

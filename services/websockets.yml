@@ -1,10 +1,13 @@
   websockets:
-    image: k1sliy/laravel-echo-server
+    build:
+      context: ./websockets
+      dockerfile: Dockerfile
+    image: space-station/websockets
     container_name: "${CONTAINER_PREFIX}-websockets"
     ports:
      - "6001:6001"
     restart: always
     volumes:
-     - ./echo/config.json:/app/laravel-echo-server.json
+     - ./websockets/config.json:/app/laravel-echo-server.json
     networks:
      - "${NETWORK_NAME}"

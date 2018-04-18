@@ -28,7 +28,7 @@ class StopCommand extends BaseCommand {
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$this->header("Stopping Mosaiqo SpaceStation: ");
+		$this->header("Stopping SpaceStation: ");
 		$this->loadEnv();
 		$this->stopEnvironment($output);
 	}

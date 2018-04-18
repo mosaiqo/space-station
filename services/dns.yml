@@ -1,11 +1,14 @@
   dns:
-   image: jpillora/dnsmasq
+   build:
+     context: ./dns
+     dockerfile: Dockerfile
+   image: space-station/dns
    container_name: "${CONTAINER_PREFIX}-dns"
    ports:
      - "53:53/udp"
      - "5380:8080"
    volumes:
-     - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+     - ./dns/dnsmasq.conf:/etc/dnsmasq.conf
    environment:
      HTTP_USER: 'admin'
      HTTP_PASS: 'secret'

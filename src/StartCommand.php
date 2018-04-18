@@ -23,7 +23,9 @@ class StartCommand extends BaseCommand {
 	{
 		$this
 			->setName('start')
-			->setDescription('Starts all the containers for "Space Station"!');
+			->setDescription('Starts all the containers for "Space Station"!')
+			->addOption('default', 'd', InputOption::VALUE_NONE, 'Use default values for config')
+			->addOption('force', 'f', InputOption::VALUE_NONE, 'Overrides the files');
 	}
 
 	/**
@@ -33,7 +35,14 @@ class StartCommand extends BaseCommand {
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$this->header("Starting Mosaiqo SpaceStation: ");
+		if (!$this->envFileExists())
+		{
+			$this->text("Space Station is not configured! \nYou need to run first: ");
+			$this->comment("space-station init");
+			return 1;
+		}
+
+		$this->header("Starting SpaceStation: ");
 		$this->loadEnv();
 		$this->startEnvironment();
 	}
@@ -45,6 +54,7 @@ class StartCommand extends BaseCommand {
 	{
 
 		$prefix = getenv('CONTAINER_PREFIX');
+		$dbUser = getenv('DB_USER');
 
 		$commands = [
 			"docker-compose -f ./docker/docker-compose.yml up --build -d",

@@ -61,23 +61,23 @@ class ConfigCommand extends BaseCommand
 		],
 		'CERT_COUNTRY' =>  [
 			'text' => 'Please enter the country for certificate: (US) ',
-			'default' => 'US'
+			'default' => 'ES'
 		],
 		'CERT_CITY' =>  [
 			'text' => 'Please enter the city for certificate: (Springfield) ',
-			'default' => 'Springfield'
+			'default' => 'Alicante'
 		],
 		'CERT_STATE' =>  [
 			'text' => 'Please enter the state for certificate: (Foo) ',
-			'default' => 'Foo'
+			'default' => 'ALC'
 		],
 		'CERT_COMPANY' =>  [
-			'text' => 'Please enter the company for certificate: (Mosaiqo) ',
-			'default' => 'Mosaiqo'
+			'text' => 'Please enter the company for certificate: (SpaceStation) ',
+			'default' => 'SpaceStation'
 		],
 		'CERT_DEPARTMENT' =>  [
 			'text' => 'Please enter the department for certificate: (Dev Team) ',
-			'default' => 'Dev Team'
+			'default' => 'DevTeam'
 		],
 	];
 

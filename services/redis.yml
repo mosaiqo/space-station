@@ -1,5 +1,8 @@
   redis:
-    image: redis:alpine
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    image: space-station/redis
     container_name: "${CONTAINER_PREFIX}-redis"
     volumes:
       - redisdata:/data

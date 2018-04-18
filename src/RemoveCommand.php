@@ -39,8 +39,9 @@ class RemoveCommand extends BaseCommand {
 		if ($this->input->getOption('force')) {
 			$remove = true;
 		} else {
+			$this->comment("This is going to remove all your containers, volumes, networks, images and config for Space Station.");
 			$remove = $helper->ask($this->input, $this->output, new ConfirmationQuestion(
-				'This is going to remove all your containers, volumes, networks and config for Mosaiqo Space Station. Are you sure?',
+				'Are you sure? (no): ',
 				false,
 				'/^(y|j)/i'
 			));
@@ -49,10 +50,10 @@ class RemoveCommand extends BaseCommand {
 		if (!$remove) { return; }
 
 
-		$this->header("Removing Mosaiqo SpaceStation: ");
+		$this->header("Removing SpaceStation: ");
 		$this->loadEnv();
 		$this->removeEnvironment();
-		$this->header("Mosaiqo SpaceStation is removed from the system!");
+		$this->header("SpaceStation is removed from the system!");
 	}
 
 	/**
@@ -67,6 +68,7 @@ class RemoveCommand extends BaseCommand {
 			"docker network rm $(docker network ls --filter=name=$prefix)",
 			"docker image rm $(docker image ls --filter=name=$prefix)",
 			"docker volume rm $(docker volume ls -qf dangling=true)",
+			"docker image rm -f $(docker image ls -a | grep space-station)",
 			"docker system prune -f"
 		];
 
