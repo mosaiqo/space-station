@@ -7,7 +7,5 @@ ARG MYSQL_ROOT_PASSWORD
 
 RUN apt-get update && apt-get --no-install-recommends --no-install-suggests -y install expect
 
-RUN echo $MYSQL_ROOT_PASSWORD
-
 ADD mysql_config.sh /root/mysql_config.sh
 RUN cd /root && ./mysql_config.sh $MYSQL_ROOT_PASSWORD

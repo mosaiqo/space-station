@@ -1,6 +1,13 @@
 #!/usr/bin/expect
 
-set pwd [lindex $argv 0];
-
+set password [lindex $argv 0];
+puts "$password";
 spawn mysql_config_editor set --login-path=local --host=localhost --user=root --password
-expect -nocase "Enter password:" {send "${pwd}\r"; interact}
+
+expect {
+    "assword" {
+        send "$password\r"
+    }
+}
+
+interact

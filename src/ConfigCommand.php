@@ -79,6 +79,10 @@ class ConfigCommand extends BaseCommand
 			'text' => 'Please enter the department for certificate: (Dev Team) ',
 			'default' => 'DevTeam'
 		],
+		'TLD' =>  [
+			'text' => 'Which TLD would you like to be configured for your dev env (local)',
+			'default' => 'local'
+		],
 	];
 
 	/**
@@ -246,6 +250,16 @@ class ConfigCommand extends BaseCommand
 			));
 		}
 		if (!$override) { return; }
+		$dnsService = array_intersect($this->configs['services'], ['dns']);
+
+		if ($dnsService) {
+			$this->fileSystem->copy(
+				"$envDirectory/docker/dns/dnsmasq.conf",
+				"$envDirectory/docker/dns/dnsmasq.backup.conf"
+			);
+			$this->fileSystem->remove("$envDirectory/docker/dns/dnsmasq.conf");
+		}
+
 
 		$this->fileSystem->mirror("$directory/docker", "$envDirectory/docker");
 		$this->fileSystem->mirror("$directory/logs", "$envDirectory/logs");
@@ -263,6 +277,17 @@ class ConfigCommand extends BaseCommand
 				"\n$content"
 			);
 		}
+
+
+		if ($dnsService) {
+			$tld = $this->configs['env']['TLD'];
+			$this->fileSystem->appendToFile(
+				"$envDirectory/docker/dns/dnsmasq.conf",
+				"\nlocal=/{$tld}/\nserver=/{$tld}/127.0.0.1\naddress=/{$tld}/127.0.0.1"
+			);
+		}
+
+
 		$volumeServices = array_intersect($this->configs['services'], ['mysql', 'redis', 'mongo']);
 		if ($volumeServices) {
 			$this->fileSystem->appendToFile("$envDirectory/docker/docker-compose.yml", "\nvolumes:");

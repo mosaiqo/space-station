@@ -13,6 +13,7 @@
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
     volumes:
+      - ./mysql/.mylogin.cnf:/.mylogin.cnf
       - mysqldata:/var/lib/mysql
     networks:
       - "${NETWORK_NAME}"

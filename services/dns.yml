@@ -10,6 +10,7 @@
    volumes:
      - ./dns/dnsmasq.conf:/etc/dnsmasq.conf
    environment:
+     TLD: "${TLD}"
      HTTP_USER: 'admin'
      HTTP_PASS: 'secret'
    networks:

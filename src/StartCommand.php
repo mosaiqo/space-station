@@ -1,6 +1,7 @@
 <?php
 namespace Mosaiqo\SpaceStation\Console;
 
+use Symfony\Component\Console\Input\ArrayInput;
 use ZipArchive;
 use RuntimeException;
 use GuzzleHttp\Client;
@@ -41,9 +42,10 @@ class StartCommand extends BaseCommand {
 			$this->comment("space-station init");
 			return 1;
 		}
-
-		$this->header("Starting SpaceStation: ");
 		$this->loadEnv();
+
+		$this->stopFirst();
+		$this->header("Starting SpaceStation: ");
 		$this->startEnvironment();
 	}
 
@@ -54,7 +56,6 @@ class StartCommand extends BaseCommand {
 	{
 
 		$prefix = getenv('CONTAINER_PREFIX');
-		$dbUser = getenv('DB_USER');
 
 		$commands = [
 			"docker-compose -f ./docker/docker-compose.yml up --build -d",
@@ -66,5 +67,14 @@ class StartCommand extends BaseCommand {
 			$directory = $this->getEnvDirectory();
 			$this->runCommand($cmd, $directory);
 			}, $commands);
+	}
+
+	protected function stopFirst()
+	{
+		$command = $this->getApplication()->find('stop');
+		$returnCode = $command->run(new ArrayInput([]), $this->output);
+		if ($returnCode === 0) {
+			$this->info("SpaceStation is stopping running services!");
+		}
 	}
 }
