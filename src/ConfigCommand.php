@@ -28,59 +28,59 @@ class ConfigCommand extends BaseCommand
 	 */
 	private $defaults = [
 		'HTTP_PORT' => [
-			'text' => 'Please enter the HTTP port: (80) ',
+			'text' => 'Please enter the HTTP port: (80): ',
 			'default' => 80
 		],
 		'HTTPS_PORT' =>  [
-			'text' => 'Please enter the HTTPS port: (443) ',
+			'text' => 'Please enter the HTTPS port: (443): ',
 			'default' => 443
 		],
 		'NETWORK_NAME' =>  [
-			'text' => 'Please enter the network name: (dev-env-network) ',
+			'text' => 'Please enter the network name: (dev-env-network): ',
 			'default' => 'dev-env-network'
 		],
 		'REDIS_PORT' =>  [
-			'text' => 'Please enter the redis port: (6379) ',
+			'text' => 'Please enter the redis port: (6379): ',
 			'default' => 6379
 		],
 		'MONGODB_PORT' =>  [
-			'text' => 'Please enter the mongo db port: (27017) ',
+			'text' => 'Please enter the mongo db port: (27017): ',
 			'default' => 27017
 		],
 		'DB_PORT' =>  [
-			'text' => 'Please enter the mysql port: (3306) ',
+			'text' => 'Please enter the mysql port: (3306): ',
 			'default' => 3306
 		],
 		'DB_ROOT_PASS' =>  [
-			'text' => 'Please enter the mysql root password: (secret) ',
+			'text' => 'Please enter the mysql root password: (secret): ',
 			'default' => 'secret'
 		],
 		'CONTAINER_PREFIX' =>  [
-			'text' => 'Please enter the prefix for your containers: (dev-env) ',
+			'text' => 'Please enter the prefix for your containers: (dev-env): ',
 			'default' => 'dev-env'
 		],
 		'CERT_COUNTRY' =>  [
-			'text' => 'Please enter the country for certificate: (US) ',
+			'text' => 'Please enter the country for certificate: (US): ',
 			'default' => 'ES'
 		],
 		'CERT_CITY' =>  [
-			'text' => 'Please enter the city for certificate: (Springfield) ',
+			'text' => 'Please enter the city for certificate: (Springfield): ',
 			'default' => 'Alicante'
 		],
 		'CERT_STATE' =>  [
-			'text' => 'Please enter the state for certificate: (Foo) ',
+			'text' => 'Please enter the state for certificate: (Foo): ',
 			'default' => 'ALC'
 		],
 		'CERT_COMPANY' =>  [
-			'text' => 'Please enter the company for certificate: (SpaceStation) ',
+			'text' => 'Please enter the company for certificate: (SpaceStation): ',
 			'default' => 'SpaceStation'
 		],
 		'CERT_DEPARTMENT' =>  [
-			'text' => 'Please enter the department for certificate: (Dev Team) ',
+			'text' => 'Please enter the department for certificate: (Dev Team): ',
 			'default' => 'DevTeam'
 		],
 		'TLD' =>  [
-			'text' => 'Which TLD would you like to be configured for your dev env (local)',
+			'text' => 'Which TLD would you like to be configured for your dev env (local): ',
 			'default' => 'local'
 		],
 	];
@@ -121,22 +121,16 @@ class ConfigCommand extends BaseCommand
 	{
 		if ($this->envFileExists()) {
 			$helper = $this->getHelper('question');
-			if ($input->getOption('force')) {
-				$override = true;
-			} else {
-				$override = $helper->ask($input, $output, new ConfirmationQuestion(
-					'There is already a config file, do you want to override it? [yes/no] (no) ',
-					false,
-					'/^(y|j)/i'
-				));
-			}
+			$force = $input->getOption('force');
+			$override = $force?:$helper->ask($input, $output, new ConfirmationQuestion(
+				'There is already a config file, do you want to override it? [yes/no] (no) ',
+				false,
+				'/^(y|j)/i'
+			));
 
-			if ($override) {
-				$this->removeEnvFile();;
-			} else {
-				return 0;
-			}
+			if (!$override) return 0;
 
+			$this->removeEnvFile();
 		}
 
 		if ($input->getOption('default')) {
@@ -205,7 +199,7 @@ class ConfigCommand extends BaseCommand
 		$this->text("\n");
 
 		$confirmationQuestion = new ConfirmationQuestion(
-			'Does this look ok? [yes|no] (yes)',
+			'Does this look ok? [yes|no] (yes): ',
 			true,
 			'/^(y|j)/i'
 		);
@@ -240,26 +234,22 @@ class ConfigCommand extends BaseCommand
 		$directory = __DIR__ . DIRECTORY_SEPARATOR . "/..";
 		$envDirectory = $this->getEnvDirectory();
 		$helper = $this->getHelper('question');
-		if ($this->input->getOption('force')) {
-			$override = true;
-		} else {
-			$override = $helper->ask($this->input, $this->output, new ConfirmationQuestion(
+		$dnsService = array_intersect($this->configs['services'], ['dns']);
+
+		if ($this->fileSystem->exists($envDirectory . DIRECTORY_SEPARATOR . 'docker-compose.yml' )) {
+			$force = $this->input->getOption('force');
+			$override = $force?:$helper->ask($this->input, $this->output, new ConfirmationQuestion(
 				'The file docker-compose.yml already exists, do you want to override it? [yes/no] (no) ',
 				false,
 				'/^(y|j)/i'
 			));
-		}
-		if (!$override) { return; }
-		$dnsService = array_intersect($this->configs['services'], ['dns']);
 
-		if ($dnsService) {
-			$this->fileSystem->copy(
-				"$envDirectory/docker/dns/dnsmasq.conf",
-				"$envDirectory/docker/dns/dnsmasq.backup.conf"
-			);
-			$this->fileSystem->remove("$envDirectory/docker/dns/dnsmasq.conf");
+			if (!$override) { return; }
 		}
 
+		if ($dnsService && $this->fileSystem->exists("$envDirectory/docker/dns/") ) {
+			$this->fileSystem->remove("$envDirectory/docker/dns/");
+		}
 
 		$this->fileSystem->mirror("$directory/docker", "$envDirectory/docker");
 		$this->fileSystem->mirror("$directory/logs", "$envDirectory/logs");

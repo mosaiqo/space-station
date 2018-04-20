@@ -13,6 +13,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
+/**
+ * Class StopCommand
+ * @package Mosaiqo\SpaceStation\Console
+ * @author Boudy de Geer <boudydegeer@mosaiqo.com>
+ */
 class StopCommand extends BaseCommand {
 	/**
 	 * Configure the command options.
@@ -26,6 +31,11 @@ class StopCommand extends BaseCommand {
 			->setDescription('Stops all the containers for "Space Station"!');
 	}
 
+	/**
+	 * @param InputInterface $input
+	 * @param OutputInterface $output
+	 * @return int|null|void
+	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$this->header("Stopping SpaceStation: ");
@@ -33,10 +43,13 @@ class StopCommand extends BaseCommand {
 		$this->stopEnvironment($output);
 	}
 
+	/**
+	 * @param $output
+	 */
 	protected function stopEnvironment($output)
 	{
 		$commands = [
-			'docker-compose -f ./docker/docker-compose.yml down'
+			'docker-compose -f ./docker/docker-compose.yml down --remove-orphans'
 		];
 
 		array_map(function ($cmd) {
