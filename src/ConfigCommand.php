@@ -235,6 +235,7 @@ class ConfigCommand extends BaseCommand
 		$envDirectory = $this->getEnvDirectory();
 		$helper = $this->getHelper('question');
 		$dnsService = array_intersect($this->configs['services'], ['dns']);
+		$mysqlServices = array_intersect($this->configs['services'], ['mysql']);
 
 		if ($this->fileSystem->exists($envDirectory . DIRECTORY_SEPARATOR . 'docker-compose.yml' )) {
 			$force = $this->input->getOption('force');
@@ -249,6 +250,10 @@ class ConfigCommand extends BaseCommand
 
 		if ($dnsService && $this->fileSystem->exists("$envDirectory/docker/dns/") ) {
 			$this->fileSystem->remove("$envDirectory/docker/dns/");
+		}
+
+		if ($mysqlServices && $this->fileSystem->exists("$envDirectory/docker/mysql/") ) {
+			$this->fileSystem->remove("$envDirectory/docker/mysql/");
 		}
 
 		$this->fileSystem->mirror("$directory/docker", "$envDirectory/docker");
@@ -277,8 +282,16 @@ class ConfigCommand extends BaseCommand
 			);
 		}
 
+		if ($mysqlServices) {
+			$pwd = $this->configs['env']['DB_ROOT_PASS'];
+			$this->fileSystem->appendToFile(
+				"$envDirectory/docker/mysql/.my.cnf",
+				"\npassword=\"{$pwd}\""
+			);
+		}
 
 		$volumeServices = array_intersect($this->configs['services'], ['mysql', 'redis', 'mongo']);
+
 		if ($volumeServices) {
 			$this->fileSystem->appendToFile("$envDirectory/docker/docker-compose.yml", "\nvolumes:");
 			foreach ($volumeServices as $service) {
