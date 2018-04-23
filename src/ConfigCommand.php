@@ -97,7 +97,7 @@ class ConfigCommand extends BaseCommand
 	/**
 	 * @var array
 	 */
-	private $services = ['proxy', 'dns', 'mysql', 'websockets', 'redis', 'mongo'];
+	private $services = ['proxy', 'dns', 'mysql', 'redis', 'mongo'];
 	/**
 	 * Configure the command options.
 	 *
