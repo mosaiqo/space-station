@@ -58,7 +58,7 @@ class StartCommand extends BaseCommand {
 		$prefix = getenv('CONTAINER_PREFIX');
 
 		$commands = [
-			"docker-compose -f ./docker/docker-compose.yml up --build -d",
+			"docker-compose -f ./docker/docker-compose.yml up --build --remove-orphans -d",
 			"docker network ls --filter=name=$prefix",
 			"docker ps --filter=name=$prefix"
 		];
