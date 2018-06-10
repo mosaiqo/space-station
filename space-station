@@ -17,5 +17,6 @@ $app->add(new Mosaiqo\SpaceStation\Console\InitCommand);
 $app->add(new Mosaiqo\SpaceStation\Console\StartCommand);
 $app->add(new Mosaiqo\SpaceStation\Console\StopCommand);
 $app->add(new Mosaiqo\SpaceStation\Console\RemoveCommand);
+$app->add(new Mosaiqo\SpaceStation\Console\ClearCacheCommand);
 $app->add(new Mosaiqo\SpaceStation\Console\GenerateSslCertificateCommand);
 $app->run();
