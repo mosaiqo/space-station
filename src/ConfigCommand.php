@@ -56,28 +56,8 @@ class ConfigCommand extends BaseCommand
 			'default' => 'secret'
 		],
 		'CONTAINER_PREFIX' =>  [
-			'text' => 'Please enter the prefix for your containers: (dev-env): ',
-			'default' => 'dev-env'
-		],
-		'CERT_COUNTRY' =>  [
-			'text' => 'Please enter the country for certificate: (US): ',
-			'default' => 'ES'
-		],
-		'CERT_CITY' =>  [
-			'text' => 'Please enter the city for certificate: (Springfield): ',
-			'default' => 'Alicante'
-		],
-		'CERT_STATE' =>  [
-			'text' => 'Please enter the state for certificate: (Foo): ',
-			'default' => 'ALC'
-		],
-		'CERT_COMPANY' =>  [
-			'text' => 'Please enter the company for certificate: (SpaceStation): ',
-			'default' => 'SpaceStation'
-		],
-		'CERT_DEPARTMENT' =>  [
-			'text' => 'Please enter the department for certificate: (Dev Team): ',
-			'default' => 'DevTeam'
+			'text' => 'Please enter the prefix for your containers: (space-station): ',
+			'default' => 'space-station'
 		],
 		'TLD' =>  [
 			'text' => 'Which TLD would you like to be configured for your dev env (local): ',
@@ -97,7 +77,9 @@ class ConfigCommand extends BaseCommand
 	/**
 	 * @var array
 	 */
-	private $services = ['proxy', 'dns', 'mysql', 'redis', 'mongo'];
+	private $services = [
+		'proxy', 'dns', 'mysql', 'redis', 'mongo', 'websockets', 'whoami'
+	];
 	/**
 	 * Configure the command options.
 	 *
@@ -174,11 +156,13 @@ class ConfigCommand extends BaseCommand
 	protected function createConfigFileOnUserInput($input, $output)
 	{
 		$helper = $this->getHelper('question');
+
 		$serviceQuestion = new ChoiceQuestion(
 			'Please select the services you would like to install ('. implode(', ', $this->services).')',
 			$this->services,
-			'0,1,2,3,4,5'
+			implode(', ', array_keys($this->services))
 		);
+
 		$serviceQuestion->setMultiselect(true);
 
 		$this->configs['services'] = $helper->ask($input, $output, $serviceQuestion);
@@ -278,7 +262,7 @@ class ConfigCommand extends BaseCommand
 			$tld = $this->configs['env']['TLD'];
 			$this->fileSystem->appendToFile(
 				"$envDirectory/docker/dns/dnsmasq.conf",
-				"\nlocal=/{$tld}/\nserver=/{$tld}/127.0.0.1\naddress=/{$tld}/127.0.0.1"
+				"\n### start {$tld} ###\nlocal=/{$tld}/\nserver=/{$tld}/127.0.0.1\naddress=/{$tld}/127.0.0.1\n### end {$tld} ###"
 			);
 		}
 

@@ -4,10 +4,9 @@
       dockerfile: Dockerfile
     image: space-station/websockets
     container_name: "${CONTAINER_PREFIX}-websockets"
-    ports:
-     - "6001:6001"
     restart: always
-    volumes:
-     - ./websockets/config.json:/app/laravel-echo-server.json
+    environment:
+      VIRTUAL_HOST: "ws.space.station"
+      VIRTUAL_PORT: 80
     networks:
      - "${NETWORK_NAME}"

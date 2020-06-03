@@ -30,7 +30,8 @@ class GenerateSslCertificateCommand extends BaseCommand {
 		$this
 			->setName('ssl-certificate')
 			->setDescription('Starts all the containers for "Space Station"!')
-			->addArgument('domain', InputArgument::REQUIRED);
+			->addArgument('domain', InputArgument::REQUIRED)
+			->addOption('wildcard', 'w', InputOption::VALUE_NONE, 'Creates a wildcard certificate');
 	}
 
 	/**
@@ -46,6 +47,8 @@ class GenerateSslCertificateCommand extends BaseCommand {
 		$this->createCertificate();
 
 		$this->info("Self signed SSL cert for $this->domain created");
+
+		$this->restartService('proxy');
 	}
 
 	/**
@@ -54,29 +57,18 @@ class GenerateSslCertificateCommand extends BaseCommand {
 	protected function createCertificate()
 	{
 		$directory = $this->getEnvDirectory()."/docker";
-		$country = getenv('CERT_COUNTRY');
-		$state = getenv('CERT_STATE');
-		$city = getenv('CERT_CITY');
-		$company = getenv('CERT_COMPANY');
-		$department = getenv('CERT_DEPARTMENT');
 
+		$wildcard = $this->input->getOption('wildcard');
+		$domain = $this->domain;
 
-		$fileSystem = new Filesystem();
-		$fileSystem->remove("$directory/ssl/openssl.cnf");
-		$fileSystem->copy("/etc/ssl/openssl.cnf", "$directory/ssl/openssl.cnf");
+		if ($wildcard) {
+			$domain .= " *.$this->domain";
+		}
 
-		$fileSystem->appendToFile(
-			"$directory/ssl/openssl.cnf",
-			"[SAN]\nsubjectAltName=DNS:hostname,IP:127.0.0.1"
-		);
-
-		$cmd = "openssl req -x509 -nodes -days 365 -newkey rsa:2048 ".
-			"-keyout $directory/nginx/certs/$this->domain.key ".
-			"-out $directory/nginx/certs/$this->domain.crt ".
-			"-subj '/C=$country/ST=$state/L=$city/O=$company/OU=$department/CN=$this->domain' ".
-			"-reqexts SAN ".
-			"-extensions SAN ".
-			"-config $directory/ssl/openssl.cnf";
+		$cmd = "mkcert ".
+					 "-cert-file {$directory}/proxy/certs/{$this->domain}.crt ".
+					 "-key-file {$directory}/proxy/certs/{$this->domain}.key ".
+			     "$domain";
 
 		$this->runCommand($cmd);
 	}

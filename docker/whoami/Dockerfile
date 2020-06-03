@@ -1,4 +1,4 @@
-FROM space-station/websocket-server
+FROM jwilder/whoami
 
 LABEL maintainer="Boudy de Geer"
 LABEL project="space-station"

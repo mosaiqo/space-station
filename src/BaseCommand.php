@@ -198,4 +198,19 @@ class BaseCommand extends Command
 		$directory = $this->getEnvDirectory();
 		return $directory. DIRECTORY_SEPARATOR . '.env';
 	}
+
+	/**
+	 * @param $name
+	 */
+	protected function restartService ($name)
+	{
+		$this->info("Restarting service $name ...");
+		$this->loadEnv();
+		$prefix = getenv('CONTAINER_PREFIX');
+
+		$cmd = "docker restart {$prefix}-{$name}";
+		$this->runCommand($cmd);
+		sleep(30);
+		$this->info("Restarted service $name");
+	}
 }

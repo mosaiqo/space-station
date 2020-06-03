@@ -23,4 +23,4 @@ challengePassword		= A challenge password
 challengePassword_min		= 4
 challengePassword_max		= 20
 [SAN]
-subjectAltName=DNS:hostname,IP:127.0.0.1
+subjectAltName=DNS:hostname,IP:192.168.1.10

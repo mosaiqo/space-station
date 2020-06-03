@@ -25,7 +25,8 @@ class RemoveCommand extends BaseCommand {
 		$this
 			->setName('remove')
 			->setDescription('Removes all the containers for "Space Station"!')
-			->addOption('force', 'f', InputOption::VALUE_NONE, 'Forces removing');
+			->addOption('force', 'f', InputOption::VALUE_NONE, 'Forces removing')
+			->addOption('all', 'a', InputOption::VALUE_NONE, 'Removes all');
 	}
 
 	/**
@@ -39,7 +40,15 @@ class RemoveCommand extends BaseCommand {
 		if ($this->input->getOption('force')) {
 			$remove = true;
 		} else {
-			$this->comment("This is going to remove all your containers, volumes, networks, images and config for Space Station.");
+			$all = $this->input->getOption('all');
+			$msg = "This is going to remove all your containers for Space Station.";
+
+			if ($all) {
+				$msg = "This is going to remove all your containers, volumes, networks, images and config for Space Station.";
+			}
+
+			$this->comment($msg);
+
 			$remove = $helper->ask($this->input, $this->output, new ConfirmationQuestion(
 				'Are you sure? (no): ',
 				false,
@@ -62,22 +71,29 @@ class RemoveCommand extends BaseCommand {
 	protected function removeEnvironment()
 	{
 		$prefix = getenv('CONTAINER_PREFIX');
-
+		$all = $this->input->getOption('all');
 		$commands = [
 			'docker-compose -f ./docker/docker-compose.yml down',
-			"docker network rm $(docker network ls --filter=name=$prefix)",
-			"docker image rm $(docker image ls --filter=name=$prefix)",
-			"docker volume rm $(docker volume ls -qf dangling=true)",
-			"docker image rm -f $(docker image ls -a | grep space-station)",
-			"docker system prune -f"
 		];
+
+		if ($all) {
+			$commands = array_merge($commands, [
+				"docker network rm $(docker network ls --filter=name=$prefix)",
+				"docker image rm $(docker image ls --filter=name=$prefix)",
+				"docker volume rm $(docker volume ls -qf dangling=true)",
+				"docker image rm -f $(docker image ls -a | grep space-station)",
+				"docker system prune -f"
+			]);
+		}
 
 		array_map(function ($cmd) {
 			$directory = $this->getEnvDirectory();
 			$this->runCommand($cmd, $directory);
 		}, $commands);
 
-		$this->fileSystem->remove($this->getEnvDirectory());
+		if ($all) {
+			$this->fileSystem->remove($this->getEnvDirectory());
+		}
 	}
 
 }

@@ -1,0 +1,12 @@
+  websockets:
+    build:
+      context: ./whoami
+      dockerfile: Dockerfile
+    image: space-station/whoami
+    container_name: "${CONTAINER_PREFIX}-whoami"
+    restart: always
+    environment:
+      VIRTUAL_HOST: "whoami.space.station"
+      VIRTUAL_PORT: 80
+    networks:
+     - "${NETWORK_NAME}"
