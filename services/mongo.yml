@@ -10,7 +10,7 @@
     ports:
       - ${MONGODB_PORT}:27017
     volumes:
-      - mongodata:/data
+      - ${CONTAINER_PREFIX}-mongo-volume:/data
       - ./logs/mongo:/var/log/mongo
     networks:
       - "${NETWORK_NAME}"

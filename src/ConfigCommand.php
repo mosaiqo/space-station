@@ -36,8 +36,8 @@ class ConfigCommand extends BaseCommand
 			'default' => 443
 		],
 		'NETWORK_NAME' =>  [
-			'text' => 'Please enter the network name: (dev-env-network): ',
-			'default' => 'dev-env-network'
+			'text' => 'Please enter the network name: (space-station-network): ',
+			'default' => 'space-station-network'
 		],
 		'REDIS_PORT' =>  [
 			'text' => 'Please enter the redis port: (6379): ',
@@ -78,7 +78,7 @@ class ConfigCommand extends BaseCommand
 	 * @var array
 	 */
 	private $services = [
-		'proxy', 'dns', 'mysql', 'redis', 'mongo', 'websockets', 'whoami'
+		'proxy', 'dns', 'mysql', 'redis', 'mongo', 'whoami'
 	];
 	/**
 	 * Configure the command options.
@@ -123,6 +123,8 @@ class ConfigCommand extends BaseCommand
 
 		$this->createEnvFile();
 		$this->createDockerFile();
+
+		return 0;
 	}
 
 	/**
@@ -247,8 +249,6 @@ class ConfigCommand extends BaseCommand
 		$this->fileSystem->remove("$directory/docker/docker-compose.yml");
 		$this->fileSystem->copy("$directory/services/base.yml", "$envDirectory/docker/docker-compose.yml");
 
-		$this->configs['services'][] = 'network';
-
 		foreach ($this->configs['services'] as $service) {
 			$content = file_get_contents("$directory/services/$service.yml");
 			$this->fileSystem->appendToFile(
@@ -256,6 +256,8 @@ class ConfigCommand extends BaseCommand
 				"\n$content"
 			);
 		}
+
+		$this->configs['services'][] = 'network';
 
 
 		if ($dnsService) {
@@ -274,15 +276,31 @@ class ConfigCommand extends BaseCommand
 			);
 		}
 
+		$networkServices = array_intersect($this->configs['services'], ['network']);
+
+		if ($networkServices) {
+			$this->fileSystem->appendToFile("$envDirectory/docker/docker-compose.yml", "\nnetworks:");
+			$name =  "{$this->configs['env']['NETWORK_NAME']}";
+
+			$this->fileSystem->appendToFile(
+				"$envDirectory/docker/docker-compose.yml",
+				"\n {$name}:\n  external:\n   name: \"\${NETWORK_NAME}\""
+			);
+		}
+
+
 		$volumeServices = array_intersect($this->configs['services'], ['mysql', 'redis', 'mongo']);
 
 		if ($volumeServices) {
 			$this->fileSystem->appendToFile("$envDirectory/docker/docker-compose.yml", "\nvolumes:");
 			foreach ($volumeServices as $service) {
+				$name =  "{$this->configs['env']['CONTAINER_PREFIX']}-{$service}-volume";
+
 				$this->fileSystem->appendToFile(
 					"$envDirectory/docker/docker-compose.yml",
-					"\n {$service}data:\n  driver: \"local\""
+					"\n {$name}:\n  external: true\n"
 				);
+				$this->runCommand("docker volume create {$name}");
 			}
 		}
 

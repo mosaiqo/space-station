@@ -56,13 +56,15 @@ class RemoveCommand extends BaseCommand {
 			));
 		}
 
-		if (!$remove) { return; }
+		if (!$remove) { return 0; }
 
 
 		$this->header("Removing SpaceStation: ");
 		$this->loadEnv();
 		$this->removeEnvironment();
 		$this->header("SpaceStation is removed from the system!");
+
+		return 0;
 	}
 
 	/**
@@ -78,10 +80,11 @@ class RemoveCommand extends BaseCommand {
 
 		if ($all) {
 			$commands = array_merge($commands, [
-				"docker network rm $(docker network ls --filter=name=$prefix)",
-				"docker image rm $(docker image ls --filter=name=$prefix)",
+				"docker network rm $(docker network ls --filter name={$prefix})",
+				"docker image rm $(docker image ls --filter name={$prefix})",
+				"docker volume rm $(docker volume ls -qf name={$prefix})",
 				"docker volume rm $(docker volume ls -qf dangling=true)",
-				"docker image rm -f $(docker image ls -a | grep space-station)",
+//				"docker image rm -f $(docker image ls -a | grep space-station)",
 				"docker system prune -f"
 			]);
 		}

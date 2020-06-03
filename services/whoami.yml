@@ -1,4 +1,4 @@
-  websockets:
+  whoami:
     build:
       context: ./whoami
       dockerfile: Dockerfile

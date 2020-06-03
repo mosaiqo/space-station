@@ -48,9 +48,12 @@ class InitCommand extends BaseCommand
 		};
 
 		$this->loadEnv();
+
 		$this->createNetwork();
 
 		$this->runStartCommand();
+
+		return 0;
 	}
 
 	/**
@@ -99,14 +102,12 @@ class InitCommand extends BaseCommand
 	protected function createNetwork()
 	{
 		$networkName = getenv('NETWORK_NAME');
-		$process = new Process("docker network ls -q --filter=name=$networkName");
+		$process = new Process(["docker", "network", "ls", "-q", "--filter=name={$networkName}"]);
 		$process->run();
-
 		$networkExists =  $process->getOutput();
-
 		if (!$networkExists) {
 			$this->info("Creating network: $networkName");
-			$process = new Process("docker network create $networkName");
+			$process = new Process(["docker", "network", "create", $networkName]);
 			$process->run();
 			$this->info("Network $networkName created!");
 		} else {

@@ -68,7 +68,8 @@ class BaseCommand extends Command
 	protected function loadEnv()
 	{
 		$dotenv = new Dotenv();
-		$dotenv->load($this->getEnvFile());
+		$dotenv->usePutenv();
+		$dotenv->loadEnv($this->getEnvFile());
 	}
 
 	/**
@@ -148,7 +149,7 @@ class BaseCommand extends Command
 	 * @return string
 	 */
 	protected function runCommand($cmd = '', $directory = null, $env = null, $input = null, $timeout = null) {
-		$process = new Process($cmd, $directory, $env, $input, $timeout);
+		$process = Process::fromShellCommandline($cmd, $directory, $env, $input, $timeout);
 		if ('\\' !== DIRECTORY_SEPARATOR && file_exists('/dev/tty') && is_readable('/dev/tty')) {
 			$process->setTty(true);
 		}

@@ -44,11 +44,15 @@ class GenerateSslCertificateCommand extends BaseCommand {
 		$this->domain = $input->getArgument('domain');
 		$this->header("Creating a self signed SSL cert for $this->domain");
 		$this->loadEnv();
-		$this->createCertificate();
+		try {
+			$this->createCertificate();
+		} catch (\Exception $e) {
+			return 1;
+		}
 
 		$this->info("Self signed SSL cert for $this->domain created");
-
 		$this->restartService('proxy');
+		return 0;
 	}
 
 	/**

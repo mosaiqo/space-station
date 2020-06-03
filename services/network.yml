@@ -1,5 +1,5 @@
 
 networks:
- dev-env-network:
+ ${CONTAINER_PREFIX}-network:
   external:
    name: "${NETWORK_NAME}"

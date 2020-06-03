@@ -42,11 +42,19 @@ class StartCommand extends BaseCommand {
 			$this->comment("space-station init");
 			return 1;
 		}
-		$this->loadEnv();
 
-		$this->stopFirst();
-		$this->header("Starting SpaceStation: ");
-		$this->startEnvironment();
+		try {
+			$this->loadEnv();
+
+			$this->stopFirst();
+			$this->header("Starting SpaceStation: ");
+			$this->startEnvironment();
+		} catch (\Exception $e) {
+			return 1;
+		}
+
+		return 0;
+
 	}
 
 	/**
@@ -69,6 +77,9 @@ class StartCommand extends BaseCommand {
 			}, $commands);
 	}
 
+	/**
+	 * @throws \Exception
+	 */
 	protected function stopFirst()
 	{
 		$command = $this->getApplication()->find('stop');

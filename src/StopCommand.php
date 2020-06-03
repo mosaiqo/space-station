@@ -41,6 +41,8 @@ class StopCommand extends BaseCommand {
 		$this->header("Stopping SpaceStation: ");
 		$this->loadEnv();
 		$this->stopEnvironment($output);
+
+		return 0;
 	}
 
 	/**
@@ -48,14 +50,17 @@ class StopCommand extends BaseCommand {
 	 */
 	protected function stopEnvironment($output)
 	{
+
 		$commands = [
-			'docker-compose -f ./docker/docker-compose.yml down --remove-orphans'
+			"docker-compose -f ./docker/docker-compose.yml down --remove-orphans"
 		];
 
 		array_map(function ($cmd) {
 			$directory = $this->getEnvDirectory();
 			$this->runCommand($cmd, $directory);
 		}, $commands);
+
+		return 0;
 	}
 
 }

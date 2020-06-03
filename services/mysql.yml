@@ -14,7 +14,7 @@
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASS}"
       DB_ROOT_PASS: "${DB_ROOT_PASS}"
     volumes:
-      - mysqldata:/var/lib/mysql
+      - ${CONTAINER_PREFIX}-mysql-volume:/var/lib/mysql
     networks:
       - "${NETWORK_NAME}"
     restart: always

@@ -41,6 +41,8 @@ class ClearCacheCommand extends BaseCommand {
 		$this->header("Clearing cache SpaceStation: ");
 		$this->loadEnv();
 		$this->clearCache($output);
+
+		return 0;
 	}
 
 	/**
