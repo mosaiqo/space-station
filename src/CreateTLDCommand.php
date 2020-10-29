@@ -49,10 +49,12 @@ class CreateTLDCommand extends BaseCommand {
 			$this->info("TLD '$this->tld' created");
 
 			$this->restartService('dns');
-			return;
+			return 0;
 		}
 
 		$this->info("TLD $this->tld exists already.");
+
+		return 0;
 	}
 
 	/**
