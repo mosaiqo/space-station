@@ -2,7 +2,7 @@
   "name": "mosaiqo/space-station",
   "displayName": "Mosaiqo SpaceStation",
   "description": "Development environment based on Docker",
-  "version": "0.6.0",
+  "version": "0.7.1",
   "require": {
     "ext-zip": "*",
     "guzzlehttp/guzzle": "~6.0",
