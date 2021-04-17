@@ -51,6 +51,10 @@ class ConfigCommand extends BaseCommand
 			'text' => 'Please enter the mysql port: (3306): ',
 			'default' => 3306
 		],
+		'MAILHOG_SMTP_PORT' =>  [
+			'text' => 'Please enter the mailhog port: (1025): ',
+			'default' => 1025
+		],
 		'DB_ROOT_PASS' =>  [
 			'text' => 'Please enter the mysql root password: (secret): ',
 			'default' => 'secret'
@@ -78,7 +82,7 @@ class ConfigCommand extends BaseCommand
 	 * @var array
 	 */
 	private $services = [
-		'proxy', 'dns', 'mysql', 'redis', 'mongo', 'whoami'
+		'proxy', 'dns', 'mysql', 'redis', 'mongo', 'mailhog', 'whoami'
 	];
 	/**
 	 * Configure the command options.

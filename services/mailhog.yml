@@ -1,0 +1,16 @@
+  mailhog:
+    container_name: "${CONTAINER_PREFIX}-mailhog"
+    image: space-station/mailhog
+    build:
+      context: ./mailhog
+      dockerfile: Dockerfile
+    ports:
+      - ${MAILHOG_SMTP_PORT}:1025 # smtp server
+    networks:
+      - "${NETWORK_NAME}"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8025" ]
+      interval: 30s
+      timeout: 10s
+      retries: 30
