@@ -11,6 +11,7 @@
       - ./proxy/certs:/etc/nginx/certs:ro
       - ./proxy/conf.d/custom.conf:/etc/nginx/conf.d/custom.conf:ro
       - ./proxy/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ./proxy/vhost.d:/etc/nginx/vhost.d:ro
       - ./logs/proxy:/var/log/nginx
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
